@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PDF Editor Pro - Ultimate</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2236;
+            --bg-elevated: #1f2b3d;
+            --bg-hover: #253045;
+            --bg-input: #15202e;
+            --border: rgba(255,255,255,0.06);
+            --border-focus: #6366f1;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-glow: rgba(99,102,241,0.3);
+            --green: #10b981;
+            --green-glow: rgba(16,185,129,0.3);
+            --red: #ef4444;
+            --red-glow: rgba(239,68,68,0.2);
+            --orange: #f59e0b;
+            --cyan: #06b6d4;
+            --pink: #ec4899;
+            --radius: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --sidebar-width: 360px;
+            --header-height: 60px;
+            --toolbar-height: 48px;
+            --status-height: 32px;
+            --transition: 0.2s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.14); }
+
+        /* HEADER */
+        .header {
+            height: var(--header-height);
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 12px;
+            position: relative;
+            z-index: 100;
+        }
+
+        .menu-toggle {
+            display: none;
+            width: 40px; height: 40px;
+            background: none; border: none;
+            color: var(--text-primary);
+            font-size: 18px; cursor: pointer;
+            border-radius: var(--radius);
+        }
+        .menu-toggle:active { background: var(--bg-hover); }
+
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 700; font-size: 17px; white-space: nowrap;
+        }
+        .logo-icon {
+            width: 34px; height: 34px; border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--pink));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: #fff;
+        }
+
+        .header-spacer { flex: 1; }
+
+        .header-actions { display: flex; gap: 8px; }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 16px; border: none; border-radius: var(--radius);
+            font-family: inherit; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: var(--transition);
+            white-space: nowrap; position: relative; overflow: hidden;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn i { font-size: 13px; }
+
+        .btn-primary {
+            background: var(--accent); color: #fff;
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+
+        .btn-ghost {
+            background: var(--bg-elevated); color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+        .btn-success {
+            background: var(--green); color: #fff;
+            box-shadow: 0 2px 12px var(--green-glow);
+        }
+        .btn-success:hover { filter: brightness(1.1); }
+
+        .btn-danger {
+            background: var(--red); color: #fff;
+            box-shadow: 0 2px 12px var(--red-glow);
+        }
+        .btn-danger:hover { filter: brightness(1.1); }
+
+        .btn-warn { background: var(--orange); color: #000; }
+        .btn-cyan { background: var(--cyan); color: #000; }
+        .btn-pink { background: var(--pink); color: #fff; }
+        .btn-block { width: 100%; justify-content: center; padding: 12px; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn[disabled] { opacity: 0.4; pointer-events: none; }
+
+        /* LAYOUT */
+        .app-body {
+            display: flex;
+            height: calc(100vh - var(--header-height));
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            z-index: 90;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .sidebar-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: var(--bg-primary);
+            padding: 6px;
+            gap: 3px;
+        }
+
+        .nav-tab {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 3px; padding: 8px 2px;
+            background: none; border: none; color: var(--text-muted);
+            font-family: inherit; font-size: 10px; font-weight: 500;
+            cursor: pointer; border-radius: 8px;
+            transition: var(--transition);
+        }
+        .nav-tab i { font-size: 15px; }
+        .nav-tab:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .nav-tab.active {
+            color: #fff; background: var(--accent);
+            box-shadow: 0 2px 8px var(--accent-glow);
+        }
+
+        .sidebar-body {
+            flex: 1; overflow-y: auto; padding: 16px;
+        }
+
+        .panel { display: none; animation: panelIn 0.25s ease; }
+        .panel.active { display: block; }
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section { margin-bottom: 22px; }
+        .section-title {
+            font-size: 11px; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .section-title i { font-size: 12px; color: var(--accent); }
+
+        .divider {
+            height: 1px; background: var(--border);
+            margin: 18px 0;
+        }
+
+        /* FORM */
+        .field { margin-bottom: 14px; }
+        .field-label {
+            display: block; font-size: 12px; font-weight: 500;
+            color: var(--text-secondary); margin-bottom: 5px;
+        }
+        .input {
+            width: 100%; padding: 9px 12px;
+            background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: var(--radius); color: var(--text-primary);
+            font-family: inherit; font-size: 13px;
+            transition: var(--transition); outline: none;
+        }
+        .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        .input::placeholder { color: var(--text-muted); }
+
+        textarea.input { min-height: 70px; resize: vertical; }
+
+        select.input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 30px;
+        }
+        select.input option { background: var(--bg-card); color: var(--text-primary); }
+
+        .row { display: flex; gap: 10px; }
+        .row > .field { flex: 1; }
+
+        .color-row {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .color-swatch {
+            width: 36px; height: 36px; border: 2px solid var(--border);
+            border-radius: 8px; cursor: pointer; padding: 2px;
+            background: transparent; flex-shrink: 0;
+        }
+        .color-swatch::-webkit-color-swatch-wrapper { padding: 1px; }
+        .color-swatch::-webkit-color-swatch { border: none; border-radius: 5px; }
+
+        .presets {
+            display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px;
+        }
+        .preset {
+            width: 24px; height: 24px; border-radius: 6px;
+            border: 2px solid transparent; cursor: pointer;
+            transition: var(--transition);
+        }
+        .preset:hover { transform: scale(1.2); border-color: #fff; }
+
+        /* RANGE */
+        .range-row {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .range-row input[type="range"] {
+            flex: 1; -webkit-appearance: none; height: 5px;
+            background: rgba(255,255,255,0.08); border-radius: 3px;
+        }
+        .range-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 16px; height: 16px;
+            background: var(--accent); border-radius: 50%; cursor: pointer;
+            box-shadow: 0 2px 6px var(--accent-glow);
+        }
+        .range-val {
+            min-width: 42px; text-align: center;
+            font-size: 11px; font-weight: 700; color: var(--accent);
+            background: rgba(99,102,241,0.1); padding: 3px 6px;
+            border-radius: 6px;
+        }
+
+        /* TOGGLE */
+        .toggle-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 6px 0;
+        }
+        .toggle-label { font-size: 13px; color: var(--text-secondary); }
+        .toggle { position: relative; width: 42px; height: 22px; }
+        .toggle input { display: none; }
+        .toggle-track {
+            position: absolute; inset: 0;
+            background: rgba(255,255,255,0.08); border-radius: 11px;
+            cursor: pointer; transition: var(--transition);
+        }
+        .toggle-track::before {
+            content: ''; position: absolute;
+            width: 16px; height: 16px; left: 3px; top: 3px;
+            background: #fff; border-radius: 50%;
+            transition: var(--transition);
+        }
+        .toggle input:checked + .toggle-track {
+            background: var(--accent);
+        }
+        .toggle input:checked + .toggle-track::before {
+            transform: translateX(20px);
+        }
+
+        /* IMG PREVIEW */
+        .img-drop {
+            width: 100%; height: 100px;
+            background: var(--bg-input); border: 2px dashed var(--border);
+            border-radius: var(--radius); display: flex;
+            align-items: center; justify-content: center;
+            overflow: hidden; cursor: pointer; position: relative;
+            transition: var(--transition);
+        }
+        .img-drop:hover { border-color: var(--accent); }
+        .img-drop img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .img-drop .ph { color: var(--text-muted); font-size: 12px; text-align: center; }
+        .img-drop .ph i { font-size: 24px; margin-bottom: 6px; display: block; }
+        .img-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+        /* WATERMARK PREVIEW */
+        .wm-preview {
+            width: 100%; height: 90px; background: #fff;
+            border-radius: var(--radius); display: flex;
+            align-items: center; justify-content: center;
+            overflow: hidden; margin: 10px 0;
+        }
+        .wm-preview-text {
+            font-weight: 800; font-size: 22px;
+            transform-origin: center;
+        }
+
+        /* ANNOTATION LIST */
+        .ann-list { display: flex; flex-direction: column; gap: 6px; }
+        .ann-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: var(--radius);
+        }
+        .ann-icon {
+            width: 30px; height: 30px; border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; flex-shrink: 0;
+        }
+        .ann-icon.t { background: rgba(99,102,241,.15); color: var(--accent); }
+        .ann-icon.l { background: rgba(6,182,212,.15); color: var(--cyan); }
+        .ann-icon.w { background: rgba(236,72,153,.15); color: var(--pink); }
+        .ann-icon.i { background: rgba(245,158,11,.15); color: var(--orange); }
+        .ann-icon.p { background: rgba(16,185,129,.15); color: var(--green); }
+        .ann-icon.r { background: rgba(239,68,68,.15); color: var(--red); }
+
+        .ann-info { flex: 1; min-width: 0; }
+        .ann-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ann-detail { font-size: 10px; color: var(--text-muted); }
+        .ann-del {
+            width: 26px; height: 26px; border: none;
+            background: var(--bg-hover); color: var(--text-muted);
+            border-radius: 6px; cursor: pointer; font-size: 10px;
+            transition: var(--transition);
+        }
+        .ann-del:hover { background: var(--red-glow); color: var(--red); }
+
+        .empty-state {
+            text-align: center; padding: 30px 10px;
+            color: var(--text-muted); font-size: 13px;
+        }
+        .empty-state i { font-size: 36px; margin-bottom: 10px; display: block; opacity: 0.3; }
+
+        /* MAIN AREA */
+        .main {
+            flex: 1; display: flex; flex-direction: column;
+            min-width: 0; background: var(--bg-primary);
+        }
+
+        /* TOOLBAR */
+        .toolbar {
+            height: var(--toolbar-height);
+            display: flex; align-items: center;
+            padding: 0 12px; gap: 4px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        .tb-group {
+            display: flex; align-items: center; gap: 2px;
+            padding-right: 10px; margin-right: 6px;
+            border-right: 1px solid var(--border);
+        }
+        .tb-group:last-child { border-right: none; margin-right: 0; }
+
+        .tb-btn {
+            width: 34px; height: 34px; border: none;
+            background: none; color: var(--text-muted);
+            border-radius: 7px; cursor: pointer;
+            font-size: 13px; transition: var(--transition);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .tb-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .tb-btn.active { background: var(--accent); color: #fff; }
+
+        .zoom-text {
+            font-size: 12px; font-weight: 600;
+            color: var(--text-muted); min-width: 40px; text-align: center;
+        }
+
+        .page-nav {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; color: var(--text-muted);
+        }
+        .page-nav input {
+            width: 38px; text-align: center; padding: 4px;
+            background: var(--bg-input); border: 1px solid var(--border);
+            border-radius: 5px; color: var(--text-primary);
+            font-family: inherit; font-size: 12px;
+        }
+
+        .tb-spacer { flex: 1; }
+
+        /* VIEWER */
+        .viewer {
+            flex: 1; overflow: auto; padding: 24px;
+            display: flex; justify-content: center;
+            align-items: flex-start;
+            background: radial-gradient(ellipse at center, #111827 0%, #0a0e1a 70%);
+        }
+        .pages-wrap {
+            display: flex; flex-direction: column;
+            gap: 24px; align-items: center;
+        }
+        .page-box {
+            position: relative; background: #fff;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+            border-radius: 3px; overflow: hidden;
+        }
+        .page-box canvas { display: block; }
+        .page-badge {
+            position: absolute; bottom: -26px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-elevated); color: var(--text-muted);
+            padding: 3px 10px; border-radius: 10px; font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* WELCOME */
+        .welcome {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 100%; text-align: center; padding: 30px;
+        }
+        .welcome-icon {
+            font-size: 64px; margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent), var(--pink));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .welcome h2 { font-size: 24px; margin-bottom: 8px; }
+        .welcome p { color: var(--text-muted); max-width: 380px; font-size: 14px; line-height: 1.6; }
+
+        .features {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 10px; margin-top: 28px; max-width: 440px; width: 100%;
+        }
+        .feat {
+            padding: 16px 8px; background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            text-align: center; transition: var(--transition);
+        }
+        .feat:hover { background: var(--bg-hover); border-color: var(--accent); transform: translateY(-2px); }
+        .feat i { font-size: 20px; color: var(--accent); margin-bottom: 6px; display: block; }
+        .feat span { font-size: 10px; color: var(--text-muted); }
+
+        .welcome-btns { display: flex; gap: 10px; margin-top: 24px; }
+
+        /* STATUS BAR */
+        .statusbar {
+            height: var(--status-height);
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            display: flex; align-items: center;
+            padding: 0 14px; font-size: 11px;
+            color: var(--text-muted); gap: 20px;
+        }
+        .status-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            display: inline-block; margin-right: 5px;
+        }
+        .status-dot.ok { background: var(--green); }
+        .status-dot.err { background: var(--red); }
+        .statusbar .spacer { flex: 1; }
+
+        /* TOAST */
+        .toast-wrap {
+            position: fixed; top: 16px; right: 16px;
+            z-index: 9999; display: flex;
+            flex-direction: column; gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 12px 18px; border-radius: var(--radius);
+            font-size: 13px; font-weight: 500;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            animation: toastIn 0.3s ease, toastOut 0.3s 2.7s ease forwards;
+            pointer-events: auto; min-width: 260px;
+            backdrop-filter: blur(12px);
+        }
+        .toast.success { background: rgba(16,185,129,0.92); color: #fff; }
+        .toast.error { background: rgba(239,68,68,0.92); color: #fff; }
+        .toast.info { background: rgba(99,102,241,0.92); color: #fff; }
+        .toast.warning { background: rgba(245,158,11,0.92); color: #000; }
+
+        @keyframes toastIn { from { opacity:0; transform:translateX(60px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes toastOut { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(60px); } }
+
+        /* LOADER */
+        .loader-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(6px);
+            z-index: 9990; display: none;
+            align-items: center; justify-content: center;
+            flex-direction: column; gap: 16px;
+        }
+        .loader-overlay.show { display: flex; }
+        .loader-spin {
+            width: 44px; height: 44px;
+            border: 3px solid rgba(255,255,255,0.08);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: lspin 0.8s linear infinite;
+        }
+        @keyframes lspin { to { transform: rotate(360deg); } }
+        .loader-text { font-size: 13px; color: var(--text-secondary); }
+
+        /* MOBILE OVERLAY */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 85;
+        }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            :root { --sidebar-width: 100%; }
+
+            .menu-toggle { display: flex; align-items: center; justify-content: center; }
+
+            .sidebar {
+                position: fixed; top: var(--header-height);
+                left: 0; bottom: 0;
+                width: min(360px, 90vw);
+                transform: translateX(-100%);
+                z-index: 90;
+                box-shadow: 4px 0 30px rgba(0,0,0,0.5);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; }
+
+            .header-actions .btn span.hide-mobile { display: none; }
+
+            .features { grid-template-columns: repeat(2, 1fr); }
+            .viewer { padding: 16px; }
+            .welcome h2 { font-size: 20px; }
+            .welcome-icon { font-size: 48px; }
+        }
+
+        @media (max-width: 480px) {
+            .header-actions .btn { padding: 8px 10px; }
+            .logo span { display: none; }
+            .toolbar { padding: 0 8px; }
+            .viewer { padding: 10px; }
+        }
+
+        /* INFO BANNER */
+        .info-banner {
+            background: rgba(99,102,241,0.08);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: var(--radius);
+            padding: 10px 12px; font-size: 11px;
+            color: var(--text-secondary); line-height: 1.5;
+            margin-bottom: 14px;
+            display: flex; gap: 8px; align-items: flex-start;
+        }
+        .info-banner i { color: var(--accent); margin-top: 2px; flex-shrink: 0; }
+
+        /* DANGER ZONE */
+        .danger-zone {
+            background: rgba(239,68,68,0.05);
+            border: 1px solid rgba(239,68,68,0.15);
+            border-radius: var(--radius);
+            padding: 14px; margin-top: 8px;
+        }
+        .danger-zone .section-title { color: var(--red); }
+        .danger-zone .section-title i { color: var(--red); }
+    </style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div class="loader-overlay" id="loader">
+    <div class="loader-spin"></div>
+    <div class="loader-text" id="loaderText">Processing…</div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- HEADER -->
+<header class="header">
+    <button class="menu-toggle" onclick="toggleMobileSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="logo">
+        <div class="logo-icon"><i class="fas fa-file-pdf"></i></div>
+        <span>PDF Editor Pro</span>
+    </div>
+    <div class="header-spacer"></div>
+    <div class="header-actions">
+        <button class="btn btn-ghost" onclick="createNewPDF()"><i class="fas fa-plus"></i><span class="hide-mobile">New</span></button>
+        <button class="btn btn-primary" onclick="$id('fileIn').click()"><i class="fas fa-folder-open"></i><span class="hide-mobile">Open</span></button>
+        <input type="file" id="fileIn" accept=".pdf" hidden onchange="openFile(event)">
+        <button class="btn btn-success" id="saveBtn" disabled onclick="savePDF()"><i class="fas fa-download"></i><span class="hide-mobile">Save</span></button>
+    </div>
+</header>
+
+<!-- BODY -->
+<div class="app-body">
+
+    <!-- SIDEBAR OVERLAY (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-nav">
+            <button class="nav-tab active" data-tab="text" onclick="navTo('text')"><i class="fas fa-font"></i>Text</button>
+            <button class="nav-tab" data-tab="links" onclick="navTo('links')"><i class="fas fa-link"></i>Links</button>
+            <button class="nav-tab" data-tab="watermark" onclick="navTo('watermark')"><i class="fas fa-tint"></i>Watermark</button>
+            <button class="nav-tab" data-tab="images" onclick="navTo('images')"><i class="fas fa-image"></i>Images</button>
+            <button class="nav-tab" data-tab="pages" onclick="navTo('pages')"><i class="fas fa-copy"></i>Pages</button>
+            <button class="nav-tab" data-tab="remove" onclick="navTo('remove')"><i class="fas fa-eraser"></i>Remove</button>
+            <button class="nav-tab" data-tab="tools" onclick="navTo('tools')"><i class="fas fa-tools"></i>Tools</button>
+            <button class="nav-tab" data-tab="history" onclick="navTo('history')"><i class="fas fa-history"></i>History</button>
+        </div>
+        <div class="sidebar-body">
+
+            <!-- ========== TEXT PANEL ========== -->
+            <div class="panel active" id="p-text">
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-font"></i>Add Text to PDF</div>
+                    <div class="field">
+                        <label class="field-label">Text Content</label>
+                        <textarea class="input" id="txtContent" placeholder="Type your text…">Sample Text</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="field">
+                            <label class="field-label">Font</label>
+                            <select class="input" id="txtFont">
+                                <option value="Helvetica">Helvetica</option>
+                                <option value="Helvetica-Bold">Helvetica Bold</option>
+                                <option value="Times-Roman">Times Roman</option>
+                                <option value="Times-Bold">Times Bold</option>
+                                <option value="Courier">Courier</option>
+                                <option value="Courier-Bold">Courier Bold</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label class="field-label">Size</label>
+                            <input type="number" class="input" id="txtSize" value="16" min="4" max="300">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Color</label>
+                        <div class="color-row">
+                            <input type="color" class="color-swatch" id="txtColor" value="#000000">
+                            <input type="text" class="input" id="txtColorHex" value="#000000" style="flex:1">
+                        </div>
+                        <div class="presets">
+                            <div class="preset" style="background:#000" onclick="setClr('txt','#000000')"></div>
+                            <div class="preset" style="background:#ef4444" onclick="setClr('txt','#ef4444')"></div>
+                            <div class="preset" style="background:#3b82f6" onclick="setClr('txt','#3b82f6')"></div>
+                            <div class="preset" style="background:#10b981" onclick="setClr('txt','#10b981')"></div>
+                            <div class="preset" style="background:#8b5cf6" onclick="setClr('txt','#8b5cf6')"></div>
+                            <div class="preset" style="background:#f59e0b" onclick="setClr('txt','#f59e0b')"></div>
+                            <div class="preset" style="background:#ec4899" onclick="setClr('txt','#ec4899')"></div>
+                            <div class="preset" style="background:#fff" onclick="setClr('txt','#ffffff')"></div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Opacity</label>
+                        <div class="range-row">
+                            <input type="range" id="txtOpacity" min="0" max="100" value="100" oninput="rv(this,'%')">
+                            <span class="range-val" id="txtOpacityV">100%</span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Rotation</label>
+                        <div class="range-row">
+                            <input type="range" id="txtRotation" min="0" max="360" value="0" oninput="rv(this,'°')">
+                            <span class="range-val" id="txtRotationV">0°</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">X</label><input type="number" class="input" id="txtX" value="50"></div>
+                        <div class="field"><label class="field-label">Y</label><input type="number" class="input" id="txtY" value="50"></div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Apply To</label>
+                        <select class="input" id="txtPage"><option value="current">Current Page</option><option value="all">All Pages</option></select>
+                    </div>
+                    <div class="info-banner"><i class="fas fa-info-circle"></i>Click on the PDF to set position automatically.</div>
+                    <button class="btn btn-primary btn-block" onclick="addText()"><i class="fas fa-plus"></i>Add Text</button>
+                </div>
+            </div>
+
+            <!-- ========== LINKS PANEL ========== -->
+            <div class="panel" id="p-links">
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-external-link-alt"></i>Add URL Hyperlink</div>
+                    <div class="field"><label class="field-label">Display Text</label><input class="input" id="lnkText" value="Click Here" placeholder="Link text"></div>
+                    <div class="field"><label class="field-label">URL</label><input class="input" id="lnkURL" value="https://example.com" placeholder="https://…"></div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">Size</label><input type="number" class="input" id="lnkSize" value="14" min="6"></div>
+                        <div class="field"><label class="field-label">Color</label><input type="color" class="color-swatch" id="lnkColor" value="#3b82f6" style="width:100%;height:38px"></div>
+                    </div>
+                    <div class="toggle-row"><span class="toggle-label">Underline</span><label class="toggle"><input type="checkbox" id="lnkUnder" checked><span class="toggle-track"></span></label></div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">X</label><input type="number" class="input" id="lnkX" value="50"></div>
+                        <div class="field"><label class="field-label">Y</label><input type="number" class="input" id="lnkY" value="50"></div>
+                    </div>
+                    <div class="field"><label class="field-label">Target Page</label><select class="input" id="lnkPage"><option value="current">Current Page</option><option value="all">All Pages</option></select></div>
+                    <button class="btn btn-cyan btn-block" onclick="addHyperlink()"><i class="fas fa-link"></i>Add Hyperlink</button>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-bookmark"></i>Add Internal Page Link</div>
+                    <div class="field"><label class="field-label">Display Text</label><input class="input" id="ilText" value="Go to Page" placeholder="Link text"></div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">Go to Page #</label><input type="number" class="input" id="ilTarget" value="1" min="1"></div>
+                        <div class="field"><label class="field-label">Size</label><input type="number" class="input" id="ilSize" value="14" min="6"></div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">X</label><input type="number" class="input" id="ilX" value="50"></div>
+                        <div class="field"><label class="field-label">Y</label><input type="number" class="input" id="ilY" value="50"></div>
+                    </div>
+                    <button class="btn btn-pink btn-block" onclick="addPageLink()"><i class="fas fa-bookmark"></i>Add Page Link</button>
+                </div>
+            </div>
+
+            <!-- ========== WATERMARK PANEL ========== -->
+            <div class="panel" id="p-watermark">
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-tint"></i>Text Watermark</div>
+                    <div class="field"><label class="field-label">Text</label><input class="input" id="wmText" value="CONFIDENTIAL" oninput="updateWmPrev()"></div>
+                    <div class="field">
+                        <label class="field-label">Font Size</label>
+                        <div class="range-row"><input type="range" id="wmSize" min="20" max="200" value="60" oninput="rv(this,'');updateWmPrev()"><span class="range-val" id="wmSizeV">60</span></div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Color</label>
+                        <div class="color-row">
+                            <input type="color" class="color-swatch" id="wmColor" value="#ef4444" onchange="updateWmPrev()">
+                            <input type="text" class="input" id="wmColorHex" value="#ef4444" style="flex:1">
+                        </div>
+                        <div class="presets">
+                            <div class="preset" style="background:#ef4444" onclick="setClr('wm','#ef4444')"></div>
+                            <div class="preset" style="background:#6b7280" onclick="setClr('wm','#6b7280')"></div>
+                            <div class="preset" style="background:#3b82f6" onclick="setClr('wm','#3b82f6')"></div>
+                            <div class="preset" style="background:#000" onclick="setClr('wm','#000000')"></div>
+                            <div class="preset" style="background:#8b5cf6" onclick="setClr('wm','#8b5cf6')"></div>
+                            <div class="preset" style="background:#059669" onclick="setClr('wm','#059669')"></div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Opacity</label>
+                        <div class="range-row"><input type="range" id="wmOpacity" min="1" max="100" value="20" oninput="rv(this,'%');updateWmPrev()"><span class="range-val" id="wmOpacityV">20%</span></div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Rotation</label>
+                        <div class="range-row"><input type="range" id="wmRotation" min="-180" max="180" value="-45" oninput="rv(this,'°');updateWmPrev()"><span class="range-val" id="wmRotationV">-45°</span></div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Position</label>
+                        <select class="input" id="wmPos" onchange="$id('wmCustomXY').style.display=this.value==='custom'?'flex':'none'">
+                            <option value="center">Center</option>
+                            <option value="top-left">Top Left</option>
+                            <option value="top-right">Top Right</option>
+                            <option value="bottom-left">Bottom Left</option>
+                            <option value="bottom-right">Bottom Right</option>
+                            <option value="tile">Tile / Repeat</option>
+                            <option value="custom">Custom X/Y</option>
+                        </select>
+                    </div>
+                    <div class="row" id="wmCustomXY" style="display:none">
+                        <div class="field"><label class="field-label">X</label><input type="number" class="input" id="wmX" value="200"></div>
+                        <div class="field"><label class="field-label">Y</label><input type="number" class="input" id="wmY" value="400"></div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Apply To</label>
+                        <select class="input" id="wmApply" onchange="$id('wmRangeRow').style.display=this.value==='range'?'block':'none'">
+                            <option value="all">All Pages</option>
+                            <option value="current">Current Page</option>
+                            <option value="odd">Odd Pages</option>
+                            <option value="even">Even Pages</option>
+                            <option value="range">Page Range</option>
+                        </select>
+                    </div>
+                    <div class="field" id="wmRangeRow" style="display:none">
+                        <label class="field-label">Range (e.g. 1-3,5)</label>
+                        <input class="input" id="wmRange" placeholder="1-3,5,7">
+                    </div>
+                    <div class="wm-preview" id="wmPrev">
+                        <div class="wm-preview-text" id="wmPrevText" style="color:rgba(239,68,68,0.2);transform:rotate(-45deg)">CONFIDENTIAL</div>
+                    </div>
+                    <button class="btn btn-pink btn-block" onclick="addTextWatermark()"><i class="fas fa-tint"></i>Apply Text Watermark</button>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-stamp"></i>Image Watermark</div>
+                    <div class="field">
+                        <label class="field-label">Watermark Image</label>
+                        <div class="img-drop" id="wmImgPrev">
+                            <div class="ph"><i class="fas fa-cloud-upload-alt"></i>Click or drag image</div>
+                            <input type="file" accept="image/*" onchange="handleWmImg(event)">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">Width</label><input type="number" class="input" id="wmIW" value="200" min="10"></div>
+                        <div class="field"><label class="field-label">Height</label><input type="number" class="input" id="wmIH" value="200" min="10"></div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Opacity</label>
+                        <div class="range-row"><input type="range" id="wmIOpacity" min="1" max="100" value="25" oninput="rv(this,'%')"><span class="range-val" id="wmIOpacityV">25%</span></div>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Rotation</label>
+                        <div class="range-row"><input type="range" id="wmIRot" min="-180" max="180" value="0" oninput="rv(this,'°')"><span class="range-val" id="wmIRotV">0°</span></div>
+                    </div>
+                    <div class="field"><label class="field-label">Position</label>
+                        <select class="input" id="wmIPos">
+                            <option value="center">Center</option><option value="top-left">Top Left</option>
+                            <option value="top-right">Top Right</option><option value="bottom-left">Bottom Left</option>
+                            <option value="bottom-right">Bottom Right</option>
+                        </select>
+                    </div>
+                    <div class="field"><label class="field-label">Apply To</label>
+                        <select class="input" id="wmIApply"><option value="all">All Pages</option><option value="current">Current Page</option></select>
+                    </div>
+                    <button class="btn btn-warn btn-block" onclick="addImgWatermark()"><i class="fas fa-stamp"></i>Apply Image Watermark</button>
+                </div>
+            </div>
+
+            <!-- ========== IMAGES PANEL ========== -->
+            <div class="panel" id="p-images">
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-image"></i>Add Image</div>
+                    <div class="field">
+                        <label class="field-label">Upload Image</label>
+                        <div class="img-drop" id="imgPrev">
+                            <div class="ph"><i class="fas fa-cloud-upload-alt"></i>Click or drag image</div>
+                            <input type="file" accept="image/png,image/jpeg" onchange="handleAddImg(event)">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">Width</label><input type="number" class="input" id="imgW" value="200" min="10"></div>
+                        <div class="field"><label class="field-label">Height</label><input type="number" class="input" id="imgH" value="150" min="10"></div>
+                    </div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">X</label><input type="number" class="input" id="imgX" value="50"></div>
+                        <div class="field"><label class="field-label">Y</label><input type="number" class="input" id="imgY" value="50"></div>
+                    </div>
+                    <div class="field"><label class="field-label">Opacity</label>
+                        <div class="range-row"><input type="range" id="imgOp" min="0" max="100" value="100" oninput="rv(this,'%')"><span class="range-val" id="imgOpV">100%</span></div>
+                    </div>
+                    <div class="field"><label class="field-label">Rotation</label>
+                        <div class="range-row"><input type="range" id="imgRot" min="0" max="360" value="0" oninput="rv(this,'°')"><span class="range-val" id="imgRotV">0°</span></div>
+                    </div>
+                    <div class="field"><label class="field-label">Target</label>
+                        <select class="input" id="imgPage"><option value="current">Current Page</option><option value="all">All Pages</option></select>
+                    </div>
+                    <button class="btn btn-warn btn-block" onclick="addImage()"><i class="fas fa-image"></i>Add Image</button>
+                </div>
+            </div>
+
+            <!-- ========== PAGES PANEL ========== -->
+            <div class="panel" id="p-pages">
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-plus-circle"></i>Add Blank Page</div>
+                    <div class="field"><label class="field-label">Size</label>
+                        <select class="input" id="pgSize" onchange="$id('pgCustom').style.display=this.value==='custom'?'flex':'none'">
+                            <option value="A4">A4</option><option value="Letter">Letter</option>
+                            <option value="Legal">Legal</option><option value="A3">A3</option><option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="row" id="pgCustom" style="display:none">
+                        <div class="field"><label class="field-label">W (pt)</label><input type="number" class="input" id="pgCW" value="595"></div>
+                        <div class="field"><label class="field-label">H (pt)</label><input type="number" class="input" id="pgCH" value="842"></div>
+                    </div>
+                    <div class="field"><label class="field-label">Insert At</label>
+                        <select class="input" id="pgInsert">
+                            <option value="end">End</option><option value="start">Beginning</option>
+                            <option value="after">After Current</option><option value="before">Before Current</option>
+                        </select>
+                    </div>
+                    <div class="field"><label class="field-label">Background</label>
+                        <div class="color-row"><input type="color" class="color-swatch" id="pgBg" value="#ffffff"><input class="input" value="#ffffff" style="flex:1" disabled></div>
+                    </div>
+                    <button class="btn btn-primary btn-block" onclick="addBlankPage()"><i class="fas fa-plus"></i>Add Page</button>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-sync-alt"></i>Rotate Page</div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">Page #</label><input type="number" class="input" id="rotPg" value="1" min="1"></div>
+                        <div class="field"><label class="field-label">Angle</label>
+                            <select class="input" id="rotAng"><option value="90">90° CW</option><option value="180">180°</option><option value="270">90° CCW</option></select>
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost btn-block" onclick="rotatePage()"><i class="fas fa-redo"></i>Rotate</button>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-object-group"></i>Merge PDF</div>
+                    <div class="field"><input type="file" class="input" id="mergeIn" accept=".pdf"></div>
+                    <div class="field"><select class="input" id="mergePos"><option value="end">At End</option><option value="start">At Start</option></select></div>
+                    <button class="btn btn-success btn-block" onclick="mergePDF()"><i class="fas fa-object-group"></i>Merge</button>
+                </div>
+                <div class="divider"></div>
+                <div class="danger-zone">
+                    <div class="section-title"><i class="fas fa-trash-alt"></i>Delete Page</div>
+                    <div class="field"><label class="field-label">Page #</label><input type="number" class="input" id="delPg" value="1" min="1"></div>
+                    <button class="btn btn-danger btn-block btn-sm" onclick="deletePage()"><i class="fas fa-trash"></i>Delete Page</button>
+                </div>
+            </div>
+
+            <!-- ========== REMOVE PANEL ========== -->
+            <div class="panel" id="p-remove">
+                <div class="info-banner"><i class="fas fa-info-circle"></i>These tools remove watermarks and links from your PDF. The removal is applied directly to the PDF structure.</div>
+
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-eraser"></i>Remove Text Watermark</div>
+                    <div class="field"><label class="field-label">Watermark text to find & remove</label>
+                        <input class="input" id="rmWmText" placeholder="e.g. CONFIDENTIAL, DRAFT…" value="">
+                    </div>
+                    <div class="toggle-row"><span class="toggle-label">Case insensitive</span><label class="toggle"><input type="checkbox" id="rmWmCase" checked><span class="toggle-track"></span></label></div>
+                    <div class="field"><label class="field-label">Apply to</label>
+                        <select class="input" id="rmWmApply"><option value="all">All Pages</option><option value="current">Current Page</option></select>
+                    </div>
+                    <button class="btn btn-danger btn-block" onclick="removeTextWatermark()"><i class="fas fa-eraser"></i>Remove Text Watermark</button>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-image"></i>Remove Image Watermark / All Images</div>
+                    <div class="info-banner"><i class="fas fa-exclamation-triangle"></i>This attempts to remove images matching the specified size range or all images on selected pages. Use carefully.</div>
+                    <div class="toggle-row"><span class="toggle-label">Remove ALL images</span><label class="toggle"><input type="checkbox" id="rmImgAll"><span class="toggle-track"></span></label></div>
+                    <div id="rmImgSizeFields">
+                        <div class="field"><label class="field-label">Min width/height (pt) to target</label><input type="number" class="input" id="rmImgMin" value="100" min="0"></div>
+                        <div class="field"><label class="field-label">Max width/height (pt)</label><input type="number" class="input" id="rmImgMax" value="9999" min="0"></div>
+                    </div>
+                    <div class="field"><label class="field-label">Apply to</label>
+                        <select class="input" id="rmImgApply"><option value="all">All Pages</option><option value="current">Current Page</option></select>
+                    </div>
+                    <button class="btn btn-danger btn-block" onclick="removeImageWatermark()"><i class="fas fa-image"></i>Remove Images</button>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-unlink"></i>Remove All Links</div>
+                    <div class="info-banner"><i class="fas fa-info-circle"></i>Removes both URL hyperlinks and internal page links from the PDF.</div>
+                    <div class="field"><label class="field-label">Apply to</label>
+                        <select class="input" id="rmLnkApply"><option value="all">All Pages</option><option value="current">Current Page</option></select>
+                    </div>
+                    <button class="btn btn-danger btn-block" onclick="removeAllLinks()"><i class="fas fa-unlink"></i>Remove All Links</button>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-link"></i>Remove Specific URL Links</div>
+                    <div class="field"><label class="field-label">URL contains (leave empty for all)</label>
+                        <input class="input" id="rmUrlFilter" placeholder="e.g. example.com">
+                    </div>
+                    <div class="field"><label class="field-label">Apply to</label>
+                        <select class="input" id="rmUrlApply"><option value="all">All Pages</option><option value="current">Current Page</option></select>
+                    </div>
+                    <button class="btn btn-danger btn-block" onclick="removeSpecificLinks()"><i class="fas fa-link"></i>Remove Matching Links</button>
+                </div>
+            </div>
+
+            <!-- ========== TOOLS PANEL ========== -->
+            <div class="panel" id="p-tools">
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-info-circle"></i>PDF Info</div>
+                    <div id="pdfInfoBox" class="info-banner"><i class="fas fa-file"></i>Open a PDF to see info.</div>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-edit"></i>Edit Metadata</div>
+                    <div class="field"><label class="field-label">Title</label><input class="input" id="metaTitle" placeholder="Document Title"></div>
+                    <div class="field"><label class="field-label">Author</label><input class="input" id="metaAuthor" placeholder="Author name"></div>
+                    <div class="field"><label class="field-label">Subject</label><input class="input" id="metaSubject" placeholder="Subject"></div>
+                    <button class="btn btn-primary btn-block" onclick="updateMeta()"><i class="fas fa-save"></i>Update Metadata</button>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-palette"></i>Page Background Color</div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">Page #</label><input type="number" class="input" id="bgPgNum" value="1" min="1"></div>
+                        <div class="field"><label class="field-label">Color</label><input type="color" class="color-swatch" id="bgPgColor" value="#f0f0f0" style="width:100%;height:38px"></div>
+                    </div>
+                    <div class="field"><label class="field-label">Apply to</label>
+                        <select class="input" id="bgPgApply"><option value="single">This Page</option><option value="all">All Pages</option></select>
+                    </div>
+                    <button class="btn btn-ghost btn-block" onclick="setPageBg()"><i class="fas fa-fill-drip"></i>Set Background</button>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-ruler"></i>Add Page Numbers</div>
+                    <div class="row">
+                        <div class="field"><label class="field-label">Position</label>
+                            <select class="input" id="pnPos">
+                                <option value="bottom-center">Bottom Center</option>
+                                <option value="bottom-right">Bottom Right</option>
+                                <option value="bottom-left">Bottom Left</option>
+                                <option value="top-center">Top Center</option>
+                                <option value="top-right">Top Right</option>
+                            </select>
+                        </div>
+                        <div class="field"><label class="field-label">Size</label><input type="number" class="input" id="pnSize" value="10" min="6"></div>
+                    </div>
+                    <div class="field"><label class="field-label">Format</label>
+                        <select class="input" id="pnFmt">
+                            <option value="num">1, 2, 3…</option>
+                            <option value="of">Page 1 of N</option>
+                            <option value="dash">- 1 -</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-ghost btn-block" onclick="addPageNumbers()"><i class="fas fa-list-ol"></i>Add Page Numbers</button>
+                </div>
+            </div>
+
+            <!-- ========== HISTORY PANEL ========== -->
+            <div class="panel" id="p-history">
+                <div class="section">
+                    <div class="section-title"><i class="fas fa-history"></i>Modification History</div>
+                    <div class="ann-list" id="historyList">
+                        <div class="empty-state"><i class="fas fa-inbox"></i>No modifications yet</div>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <button class="btn btn-danger btn-block btn-sm" onclick="clearHistory()"><i class="fas fa-trash-alt"></i>Clear History</button>
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+        <div class="toolbar">
+            <div class="tb-group">
+                <button class="tb-btn" onclick="zoom(0.2)" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+                <button class="tb-btn" onclick="zoom(-0.2)" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
+                <button class="tb-btn" onclick="zoomReset()" title="Reset"><i class="fas fa-expand"></i></button>
+                <span class="zoom-text" id="zoomLbl">100%</span>
+            </div>
+            <div class="tb-group">
+                <button class="tb-btn" onclick="pgNav(-1)"><i class="fas fa-chevron-left"></i></button>
+                <div class="page-nav">
+                    <input type="number" id="pgInput" value="1" min="1" onchange="goPage(this.value)">
+                    <span>/ <span id="pgTotal">0</span></span>
+                </div>
+                <button class="tb-btn" onclick="pgNav(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="tb-spacer"></div>
+            <div class="tb-group">
+                <button class="tb-btn" onclick="toggleDesktopSidebar()" title="Toggle Panel"><i class="fas fa-columns"></i></button>
+            </div>
+        </div>
+
+        <div class="viewer" id="viewer">
+            <div class="welcome" id="welcome">
+                <div class="welcome-icon"><i class="fas fa-file-pdf"></i></div>
+                <h2>PDF Editor Pro</h2>
+                <p>Open a PDF or create a new one. Full editing, watermark adding & removal, link management, and more.</p>
+                <div class="features">
+                    <div class="feat"><i class="fas fa-font"></i><span>Add Text</span></div>
+                    <div class="feat"><i class="fas fa-link"></i><span>Links</span></div>
+                    <div class="feat"><i class="fas fa-tint"></i><span>Watermarks</span></div>
+                    <div class="feat"><i class="fas fa-eraser"></i><span>Remove WM</span></div>
+                    <div class="feat"><i class="fas fa-unlink"></i><span>Remove Links</span></div>
+                    <div class="feat"><i class="fas fa-image"></i><span>Images</span></div>
+                    <div class="feat"><i class="fas fa-copy"></i><span>Pages</span></div>
+                    <div class="feat"><i class="fas fa-tools"></i><span>Tools</span></div>
+                </div>
+                <div class="welcome-btns">
+                    <button class="btn btn-primary" onclick="$id('fileIn').click()"><i class="fas fa-folder-open"></i>Open PDF</button>
+                    <button class="btn btn-ghost" onclick="createNewPDF()"><i class="fas fa-plus"></i>Create New</button>
+                </div>
+            </div>
+            <div class="pages-wrap" id="pagesWrap" style="display:none"></div>
+        </div>
+
+        <div class="statusbar">
+            <span><span class="status-dot ok" id="sDot"></span><span id="sText">Ready</span></span>
+            <span class="spacer"></span>
+            <span id="sSize">—</span>
+            <span id="sDims">—</span>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== GLOBALS ====================
+const {PDFDocument,StandardFonts,rgb,degrees,PDFName,PDFArray,PDFString,PDFDict} = PDFLib;
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+let doc=null, jsDoc=null, rawBytes=null;
+let curPage=1, totalPages=0, zScale=1, fName='document.pdf';
+let history=[];
+let wmImgData=null, addImgData=null;
+
+const $id=id=>document.getElementById(id);
+
+// ==================== UI HELPERS ====================
+function toast(msg,type='info'){
+    const t=document.createElement('div');
+    t.className=`toast ${type}`;
+    const ic={success:'check-circle',error:'times-circle',info:'info-circle',warning:'exclamation-triangle'};
+    t.innerHTML=`<i class="fas fa-${ic[type]}"></i>${msg}`;
+    $id('toasts').appendChild(t);
+    setTimeout(()=>t.remove(),3100);
+}
+function loading(t='Processing…'){$id('loaderText').textContent=t;$id('loader').classList.add('show');}
+function loaded(){$id('loader').classList.remove('show');}
+
+function rv(el,suffix){
+    const v=$id(el.id+'V');
+    if(v)v.textContent=el.value+suffix;
+}
+
+function setClr(pre,c){
+    $id(pre+'Color').value=c;
+    const h=$id(pre+'ColorHex');
+    if(h)h.value=c;
+    if(pre==='wm')updateWmPrev();
+}
+
+function hex2rgb(h){
+    h=h.replace('#','');
+    return{r:parseInt(h.substr(0,2),16)/255,g:parseInt(h.substr(2,2),16)/255,b:parseInt(h.substr(4,2),16)/255};
+}
+
+function navTo(tab){
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.querySelector(`.nav-tab[data-tab="${tab}"]`).classList.add('active');
+    $id('p-'+tab).classList.add('active');
+}
+
+function toggleMobileSidebar(){
+    $id('sidebar').classList.toggle('open');
+    $id('sidebarOverlay').classList.toggle('show');
+}
+function closeMobileSidebar(){
+    $id('sidebar').classList.remove('open');
+    $id('sidebarOverlay').classList.remove('show');
+}
+function toggleDesktopSidebar(){
+    const s=$id('sidebar');
+    s.style.display=s.style.display==='none'?'':'none';
+}
+
+function updateWmPrev(){
+    const t=$id('wmText').value||'WATERMARK';
+    const c=$id('wmColor').value;
+    const o=+$id('wmOpacity').value/100;
+    const r=+$id('wmRotation').value;
+    const s=Math.min(+$id('wmSize').value||60,36);
+    const el=$id('wmPrevText');
+    el.textContent=t;el.style.color=c;el.style.opacity=o;
+    el.style.transform=`rotate(${r}deg)`;el.style.fontSize=s+'px';
+}
+
+// Color sync
+$id('txtColor').oninput=function(){$id('txtColorHex').value=this.value};
+$id('txtColorHex').oninput=function(){if(/^#[0-9a-f]{6}$/i.test(this.value))$id('txtColor').value=this.value};
+$id('wmColor').oninput=function(){$id('wmColorHex').value=this.value;updateWmPrev()};
+$id('rmImgAll').onchange=function(){$id('rmImgSizeFields').style.display=this.checked?'none':'block'};
+
+// ==================== PDF CORE ====================
+async function openFile(e){
+    const f=e.target.files[0];if(!f)return;
+    fName=f.name; loading('Loading PDF…');
+    try{
+        const ab=await f.arrayBuffer();
+        rawBytes=new Uint8Array(ab);
+        await loadPdf(rawBytes);
+        toast('PDF loaded!','success');
+        $id('saveBtn').disabled=false;
+        setStatus('Loaded','ok');
+        $id('sSize').textContent=formatSize(f.size);
+    }catch(err){toast('Error: '+err.message,'error');setStatus('Error','err');}
+    loaded();e.target.value='';
+}
+
+async function loadPdf(bytes){
+    doc=await PDFDocument.load(bytes,{ignoreEncryption:true});
+    jsDoc=await pdfjsLib.getDocument({data:bytes.slice(0)}).promise;
+    totalPages=jsDoc.numPages;
+    $id('pgTotal').textContent=totalPages;
+    $id('pgInput').max=totalPages;
+    curPage=1;$id('pgInput').value=1;
+    $id('welcome').style.display='none';
+    $id('pagesWrap').style.display='flex';
+    updatePdfInfo();
+    await renderAll();
+}
+
+async function reload(){
+    rawBytes=await doc.save();
+    jsDoc=await pdfjsLib.getDocument({data:rawBytes.slice(0)}).promise;
+    totalPages=jsDoc.numPages;
+    $id('pgTotal').textContent=totalPages;
+    $id('pgInput').max=totalPages;
+    if(curPage>totalPages)curPage=totalPages;
+    await renderAll();
+}
+
+async function renderAll(){
+    const w=$id('pagesWrap');w.innerHTML='';
+    for(let i=1;i<=totalPages;i++){
+        const pg=await jsDoc.getPage(i);
+        const vp=pg.getViewport({scale:zScale*1.5});
+        const box=document.createElement('div');
+        box.className='page-box';box.id='pb-'+i;
+        box.style.width=vp.width+'px';box.style.height=vp.height+'px';
+        const cv=document.createElement('canvas');
+        cv.width=vp.width;cv.height=vp.height;
+        await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise;
+        const badge=document.createElement('div');
+        badge.className='page-badge';badge.textContent='Page '+i;
+        box.appendChild(cv);box.appendChild(badge);
+        cv.addEventListener('click',function(e){
+            const r=cv.getBoundingClientRect();
+            const sx=pg.getViewport({scale:1}).width/cv.width;
+            const sy=pg.getViewport({scale:1}).height/cv.height;
+            const x=Math.round((e.clientX-r.left)*sx);
+            const y=Math.round(pg.getViewport({scale:1}).height-(e.clientY-r.top)*sy);
+            ['txtX','lnkX','ilX','imgX'].forEach(id=>{const el=$id(id);if(el)el.value=x});
+            ['txtY','lnkY','ilY','imgY'].forEach(id=>{const el=$id(id);if(el)el.value=y});
+            curPage=i;$id('pgInput').value=i;
+            toast(`Position: X=${x}, Y=${y} (Page ${i})`,'info');
+        });
+        w.appendChild(box);
+    }
+}
+
+// ==================== ZOOM & NAV ====================
+function zoom(d){zScale=Math.max(0.3,Math.min(4,zScale+d));$id('zoomLbl').textContent=Math.round(zScale*100)+'%';renderAll();}
+function zoomReset(){zScale=1;$id('zoomLbl').textContent='100%';renderAll();}
+function pgNav(d){const n=curPage+d;if(n>=1&&n<=totalPages){curPage=n;$id('pgInput').value=n;scrollPg(n);}}
+function goPage(v){v=+v;if(v>=1&&v<=totalPages){curPage=v;$id('pgInput').value=v;scrollPg(v);}}
+function scrollPg(n){const el=$id('pb-'+n);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}
+
+// ==================== HELPERS ====================
+function getFont(name){
+    const m={'Helvetica':StandardFonts.Helvetica,'Helvetica-Bold':StandardFonts.HelveticaBold,
+        'Times-Roman':StandardFonts.TimesRoman,'Times-Bold':StandardFonts.TimesRomanBold,
+        'Courier':StandardFonts.Courier,'Courier-Bold':StandardFonts.CourierBold};
+    return m[name]||StandardFonts.Helvetica;
+}
+
+function tgtPages(pages,val){
+    if(val==='all')return pages;
+    if(val==='current')return[pages[curPage-1]];
+    const n=+val;if(n>=1&&n<=pages.length)return[pages[n-1]];
+    return[pages[curPage-1]];
+}
+
+function wmPages(pages,opt){
+    if(opt==='all')return pages;
+    if(opt==='current')return[pages[curPage-1]];
+    if(opt==='odd')return pages.filter((_,i)=>i%2===0);
+    if(opt==='even')return pages.filter((_,i)=>i%2===1);
+    if(opt==='range'){
+        const s=$id('wmRange').value;const res=[];
+        s.split(',').forEach(p=>{p=p.trim();
+            if(p.includes('-')){const[a,b]=p.split('-').map(Number);for(let i=a;i<=b&&i<=pages.length;i++)if(i>=1)res.push(pages[i-1]);}
+            else{const n=+p;if(n>=1&&n<=pages.length)res.push(pages[n-1]);}});
+        return res.length?res:pages;
+    }
+    return pages;
+}
+
+function posCalc(pos,pw,ph,ow,oh){
+    switch(pos){
+        case'center':return{x:(pw-ow)/2,y:(ph-oh)/2};
+        case'top-left':return{x:40,y:ph-oh-40};
+        case'top-right':return{x:pw-ow-40,y:ph-oh-40};
+        case'bottom-left':return{x:40,y:40};
+        case'bottom-right':return{x:pw-ow-40,y:40};
+        default:return{x:(pw-ow)/2,y:(ph-oh)/2};
+    }
+}
+
+function addHist(type,name,detail){
+    history.push({type,name,detail,time:new Date()});
+    renderHistory();
+}
+
+function renderHistory(){
+    const l=$id('historyList');
+    if(!history.length){l.innerHTML='<div class="empty-state"><i class="fas fa-inbox"></i>No modifications yet</div>';return;}
+    const icMap={t:'font',l:'link',w:'tint',i:'image',p:'copy',r:'eraser'};
+    l.innerHTML=history.slice().reverse().map((h,ri)=>{
+        const idx=history.length-1-ri;
+        return`<div class="ann-item"><div class="ann-icon ${h.type}"><i class="fas fa-${icMap[h.type]||'circle'}"></i></div><div class="ann-info"><div class="ann-name">${h.name}</div><div class="ann-detail">${h.detail}</div></div><button class="ann-del" onclick="history.splice(${idx},1);renderHistory()"><i class="fas fa-times"></i></button></div>`;
+    }).join('');
+}
+function clearHistory(){history=[];renderHistory();toast('History cleared','info');}
+
+function formatSize(b){return b>1048576?(b/1048576).toFixed(2)+' MB':(b/1024).toFixed(1)+' KB';}
+function setStatus(t,type){$id('sText').textContent=t;$id('sDot').className='status-dot '+(type==='ok'?'ok':'err');}
+
+function updatePdfInfo(){
+    const pages=doc.getPages();
+    const p1=pages[0];
+    const{width,height}=p1.getSize();
+    $id('sDims').textContent=`${Math.round(width)}×${Math.round(height)} pt`;
+    $id('metaTitle').value=doc.getTitle()||'';
+    $id('metaAuthor').value=doc.getAuthor()||'';
+    $id('metaSubject').value=doc.getSubject()||'';
+    $id('pdfInfoBox').innerHTML=`<i class="fas fa-file-pdf"></i><div><b>${fName}</b><br>Pages: ${totalPages} | Size: ${Math.round(width)}×${Math.round(height)} pt<br>Title: ${doc.getTitle()||'—'} | Author: ${doc.getAuthor()||'—'}</div>`;
+}
+
+// ==================== CREATE NEW ====================
+async function createNewPDF(){
+    loading('Creating…');
+    try{
+        doc=await PDFDocument.create();
+        const pg=doc.addPage([595.28,841.89]);
+        const f=await doc.embedFont(StandardFonts.Helvetica);
+        pg.drawText('New Document',{x:50,y:780,size:24,font:f,color:rgb(0.2,0.2,0.2)});
+        rawBytes=await doc.save();await loadPdf(rawBytes);
+        history=[];renderHistory();
+        $id('saveBtn').disabled=false;fName='new-document.pdf';
+        toast('New PDF created!','success');setStatus('Created','ok');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== ADD TEXT ====================
+async function addText(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const text=$id('txtContent').value;if(!text.trim())return toast('Enter text!','warning');
+    loading('Adding text…');
+    try{
+        const font=await doc.embedFont(getFont($id('txtFont').value));
+        const sz=+$id('txtSize').value||16;
+        const c=hex2rgb($id('txtColor').value);
+        const op=+$id('txtOpacity').value/100;
+        const rot=+$id('txtRotation').value||0;
+        const x=+$id('txtX').value||50, y=+$id('txtY').value||50;
+        const pages=doc.getPages();
+        tgtPages(pages,$id('txtPage').value).forEach(pg=>{
+            text.split('\n').forEach((line,i)=>{
+                pg.drawText(line,{x,y:y-i*(sz+4),size:sz,font,color:rgb(c.r,c.g,c.b),opacity:op,rotate:degrees(rot)});
+            });
+        });
+        await reload();
+        addHist('t',`"${text.substring(0,25)}"`,`Size:${sz}, Page:${$id('txtPage').value}`);
+        toast('Text added!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== ADD HYPERLINK ====================
+async function addHyperlink(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const text=$id('lnkText').value||'Link';
+    const url=$id('lnkURL').value;if(!url)return toast('Enter URL!','warning');
+    loading('Adding link…');
+    try{
+        const font=await doc.embedFont(StandardFonts.Helvetica);
+        const sz=+$id('lnkSize').value||14;
+        const c=hex2rgb($id('lnkColor').value);
+        const ul=$id('lnkUnder').checked;
+        const x=+$id('lnkX').value||50, y=+$id('lnkY').value||50;
+        const pages=doc.getPages();
+        tgtPages(pages,$id('lnkPage').value).forEach(pg=>{
+            pg.drawText(text,{x,y,size:sz,font,color:rgb(c.r,c.g,c.b)});
+            const tw=font.widthOfTextAtSize(text,sz);
+            if(ul)pg.drawLine({start:{x,y:y-2},end:{x:x+tw,y:y-2},thickness:1,color:rgb(c.r,c.g,c.b)});
+            const annot=doc.context.obj({Type:'Annot',Subtype:'Link',Rect:[x,y-4,x+tw,y+sz],Border:[0,0,0],
+                A:{Type:'Action',S:'URI',URI:PDFString.of(url)}});
+            const ref=doc.context.register(annot);
+            const annots=pg.node.get(PDFName.of('Annots'));
+            if(annots instanceof PDFArray)annots.push(ref);
+            else pg.node.set(PDFName.of('Annots'),doc.context.obj([ref]));
+        });
+        await reload();
+        addHist('l',`"${text}" → ${url.substring(0,30)}`,`Page:${$id('lnkPage').value}`);
+        toast('Hyperlink added!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== ADD PAGE LINK ====================
+async function addPageLink(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const text=$id('ilText').value||'Link';
+    const target=+$id('ilTarget').value||1;
+    if(target<1||target>totalPages)return toast('Invalid page number!','warning');
+    loading('Adding page link…');
+    try{
+        const font=await doc.embedFont(StandardFonts.Helvetica);
+        const sz=+$id('ilSize').value||14;
+        const x=+$id('ilX').value||50, y=+$id('ilY').value||50;
+        const pages=doc.getPages();const pg=pages[curPage-1];const tpg=pages[target-1];
+        pg.drawText(text,{x,y,size:sz,font,color:rgb(0.04,0.52,0.89)});
+        const tw=font.widthOfTextAtSize(text,sz);
+        pg.drawLine({start:{x,y:y-2},end:{x:x+tw,y:y-2},thickness:1,color:rgb(0.04,0.52,0.89)});
+        const annot=doc.context.obj({Type:'Annot',Subtype:'Link',Rect:[x,y-4,x+tw,y+sz],Border:[0,0,0],
+            Dest:[tpg.ref,PDFName.of('Fit')]});
+        const ref=doc.context.register(annot);
+        const annots=pg.node.get(PDFName.of('Annots'));
+        if(annots instanceof PDFArray)annots.push(ref);
+        else pg.node.set(PDFName.of('Annots'),doc.context.obj([ref]));
+        await reload();
+        addHist('l',`"${text}" → Page ${target}`,`From page ${curPage}`);
+        toast('Page link added!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== TEXT WATERMARK ====================
+async function addTextWatermark(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const text=$id('wmText').value||'WATERMARK';
+    loading('Adding watermark…');
+    try{
+        const font=await doc.embedFont(StandardFonts.HelveticaBold);
+        const sz=+$id('wmSize').value||60;
+        const c=hex2rgb($id('wmColor').value);
+        const op=+$id('wmOpacity').value/100;
+        const rot=+$id('wmRotation').value||-45;
+        const pos=$id('wmPos').value;
+        const pages=doc.getPages();
+        wmPages(pages,$id('wmApply').value).forEach(pg=>{
+            const{width,height}=pg.getSize();
+            const tw=font.widthOfTextAtSize(text,sz);
+            if(pos==='tile'){
+                for(let ty=0;ty<height+sz;ty+=sz*2.5){
+                    for(let tx=-tw;tx<width+tw;tx+=tw*1.5){
+                        pg.drawText(text,{x:tx,y:ty,size:sz,font,color:rgb(c.r,c.g,c.b),opacity:op,rotate:degrees(rot)});
+                    }
+                }
+            }else{
+                let wx,wy;
+                if(pos==='custom'){wx=+$id('wmX').value||200;wy=+$id('wmY').value||400;}
+                else if(pos==='center'){wx=(width-tw)/2;wy=height/2;}
+                else if(pos==='top-left'){wx=50;wy=height-80;}
+                else if(pos==='top-right'){wx=width-tw-50;wy=height-80;}
+                else if(pos==='bottom-left'){wx=50;wy=80;}
+                else if(pos==='bottom-right'){wx=width-tw-50;wy=80;}
+                else{wx=(width-tw)/2;wy=height/2;}
+                pg.drawText(text,{x:wx,y:wy,size:sz,font,color:rgb(c.r,c.g,c.b),opacity:op,rotate:degrees(rot)});
+            }
+        });
+        await reload();
+        addHist('w',`"${text}"`,`Opacity:${Math.round(op*100)}%, Rot:${rot}°`);
+        toast('Text watermark applied!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== IMAGE WATERMARK ====================
+function handleWmImg(e){
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{wmImgData=ev.target.result;$id('wmImgPrev').innerHTML=`<img src="${wmImgData}"><input type="file" accept="image/*" onchange="handleWmImg(event)">`};
+    r.readAsDataURL(f);
+}
+
+async function addImgWatermark(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    if(!wmImgData)return toast('Upload image!','warning');
+    loading('Adding image watermark…');
+    try{
+        const ib=await fetch(wmImgData).then(r=>r.arrayBuffer());
+        const img=wmImgData.includes('image/png')?await doc.embedPng(ib):await doc.embedJpg(ib);
+        const w=+$id('wmIW').value||200, h=+$id('wmIH').value||200;
+        const op=+$id('wmIOpacity').value/100;
+        const rot=+$id('wmIRot').value||0;
+        const pos=$id('wmIPos').value;
+        const pages=doc.getPages();
+        const tgt=$id('wmIApply').value==='all'?pages:[pages[curPage-1]];
+        tgt.forEach(pg=>{
+            const ps=pg.getSize();
+            const p=posCalc(pos,ps.width,ps.height,w,h);
+            pg.drawImage(img,{x:p.x,y:p.y,width:w,height:h,opacity:op,rotate:degrees(rot)});
+        });
+        await reload();
+        addHist('i','Image Watermark',`Opacity:${Math.round(op*100)}%, ${pos}`);
+        toast('Image watermark applied!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== ADD IMAGE ====================
+function handleAddImg(e){
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{addImgData=ev.target.result;$id('imgPrev').innerHTML=`<img src="${addImgData}"><input type="file" accept="image/png,image/jpeg" onchange="handleAddImg(event)">`};
+    r.readAsDataURL(f);
+}
+
+async function addImage(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    if(!addImgData)return toast('Upload image!','warning');
+    loading('Adding image…');
+    try{
+        const ib=await fetch(addImgData).then(r=>r.arrayBuffer());
+        const img=addImgData.includes('image/png')?await doc.embedPng(ib):await doc.embedJpg(ib);
+        const w=+$id('imgW').value||200,h=+$id('imgH').value||150;
+        const x=+$id('imgX').value||50,y=+$id('imgY').value||50;
+        const op=+$id('imgOp').value/100;
+        const rot=+$id('imgRot').value||0;
+        const pages=doc.getPages();
+        tgtPages(pages,$id('imgPage').value).forEach(pg=>{
+            pg.drawImage(img,{x,y,width:w,height:h,opacity:op,rotate:degrees(rot)});
+        });
+        await reload();
+        addHist('i',`Image ${w}×${h}`,`Opacity:${Math.round(op*100)}%`);
+        toast('Image added!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== PAGE MANAGEMENT ====================
+async function addBlankPage(){
+    if(!doc)return toast('Open/create PDF first!','warning');
+    loading('Adding page…');
+    try{
+        const s=$id('pgSize').value;let w,h;
+        if(s==='A4'){w=595.28;h=841.89}else if(s==='Letter'){w=612;h=792}
+        else if(s==='Legal'){w=612;h=1008}else if(s==='A3'){w=841.89;h=1190.55}
+        else{w=+$id('pgCW').value||595;h=+$id('pgCH').value||842}
+        const ins=$id('pgInsert').value;
+        let idx;
+        if(ins==='end')idx=doc.getPageCount();
+        else if(ins==='start')idx=0;
+        else if(ins==='after')idx=curPage;
+        else idx=Math.max(0,curPage-1);
+        const pg=doc.insertPage(idx,[w,h]);
+        const bgHex=$id('pgBg').value;
+        if(bgHex!=='#ffffff'){const c=hex2rgb(bgHex);pg.drawRectangle({x:0,y:0,width:w,height:h,color:rgb(c.r,c.g,c.b)});}
+        await reload();
+        addHist('p','Blank page added',`${ins}, ${s}`);
+        toast('Page added!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+async function deletePage(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const n=+$id('delPg').value;
+    if(n<1||n>totalPages)return toast('Invalid page!','warning');
+    if(totalPages<=1)return toast("Can't delete only page!",'warning');
+    loading('Deleting…');
+    try{
+        doc.removePage(n-1);await reload();
+        addHist('r',`Page ${n} deleted`,'');
+        toast(`Page ${n} deleted!`,'success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+async function rotatePage(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const n=+$id('rotPg').value, a=+$id('rotAng').value;
+    if(n<1||n>totalPages)return toast('Invalid page!','warning');
+    loading('Rotating…');
+    try{
+        const pg=doc.getPages()[n-1];
+        pg.setRotation(degrees(pg.getRotation().angle+a));
+        await reload();
+        addHist('p',`Page ${n} rotated ${a}°`,'');
+        toast('Rotated!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+async function mergePDF(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const f=$id('mergeIn').files[0];if(!f)return toast('Select PDF to merge!','warning');
+    loading('Merging…');
+    try{
+        const ab=await f.arrayBuffer();
+        const m=await PDFDocument.load(ab);
+        const cp=await doc.copyPages(m,m.getPageIndices());
+        if($id('mergePos').value==='end')cp.forEach(p=>doc.addPage(p));
+        else cp.reverse().forEach(p=>doc.insertPage(0,p));
+        await reload();
+        addHist('p',`Merged: ${f.name}`,`${cp.length} pages`);
+        toast(`Merged ${cp.length} pages!`,'success');
+        $id('mergeIn').value='';
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== REMOVE TEXT WATERMARK ====================
+async function removeTextWatermark(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const searchText=$id('rmWmText').value.trim();
+    if(!searchText)return toast('Enter watermark text to find!','warning');
+    const caseSensitive=!$id('rmWmCase').checked;
+    const applyTo=$id('rmWmApply').value;
+    loading('Removing text watermark…');
+    try{
+        const pages=doc.getPages();
+        const targetPgs=applyTo==='all'?pages:[pages[curPage-1]];
+        let removed=0;
+
+        for(const page of targetPgs){
+            const contentStreamRefs=page.node.get(PDFName.of('Contents'));
+            if(!contentStreamRefs)continue;
+
+            const refs=[];
+            if(contentStreamRefs instanceof PDFArray){
+                for(let i=0;i<contentStreamRefs.size();i++) refs.push(contentStreamRefs.get(i));
+            } else {
+                refs.push(contentStreamRefs);
+            }
+
+            for(const ref of refs){
+                const stream=doc.context.lookup(ref);
+                if(!stream)continue;
+                let content='';
+                try{
+                    const encoded=stream.getContents();
+                    content=new TextDecoder('latin1').decode(encoded);
+                }catch{continue;}
+
+                const searchStr=caseSensitive?searchText:searchText.toLowerCase();
+                const contentCheck=caseSensitive?content:content.toLowerCase();
+
+                if(contentCheck.includes(searchStr)){
+                    // Remove text drawing operations containing the watermark text
+                    const lines=content.split('\n');
+                    const filtered=[];
+                    let skip=false;
+                    for(let i=0;i<lines.length;i++){
+                        const line=lines[i];
+                        const lineCheck=caseSensitive?line:line.toLowerCase();
+                        // Check for text showing operators with our watermark text
+                        if(lineCheck.includes(searchStr) && (line.includes('Tj') || line.includes('TJ') || line.includes("'") || line.includes('"'))){
+                            removed++;
+                            continue;
+                        }
+                        // Also handle BT...ET blocks containing the watermark
+                        if(line.trim()==='BT'){
+                            // Look ahead to see if this text block contains our watermark
+                            let blockEnd=-1;
+                            let blockContainsWm=false;
+                            for(let j=i+1;j<lines.length;j++){
+                                const jCheck=caseSensitive?lines[j]:lines[j].toLowerCase();
+                                if(jCheck.includes(searchStr))blockContainsWm=true;
+                                if(lines[j].trim()==='ET'){blockEnd=j;break;}
+                            }
+                            if(blockContainsWm && blockEnd>-1){
+                                i=blockEnd; removed++; continue;
+                            }
+                        }
+                        filtered.push(line);
+                    }
+
+                    if(removed>0){
+                        const newContent=filtered.join('\n');
+                        const newBytes=new TextEncoder().encode(newContent);
+                        const newStream=doc.context.flateStream(newContent);
+                        // Direct content replacement
+                        try{
+                            stream.setContents(new TextEncoder().encode(newContent));
+                        }catch{
+                            // Alternative: rebuild the stream
+                        }
+                    }
+                }
+            }
+        }
+
+        // Alternative approach: re-save and reload to rebuild
+        await reload();
+        addHist('r',`Removed text WM: "${searchText}"`,`Found ~${removed} instances`);
+        toast(removed>0?`Removed watermark text! (~${removed} found)`:'Watermark text processed. Try saving and re-opening if needed.','success');
+    }catch(e){console.error(e);toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== REMOVE IMAGE WATERMARK ====================
+async function removeImageWatermark(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const removeAll=$id('rmImgAll').checked;
+    const minSize=+$id('rmImgMin').value||0;
+    const maxSize=+$id('rmImgMax').value||9999;
+    const applyTo=$id('rmImgApply').value;
+    loading('Removing images…');
+    try{
+        const pages=doc.getPages();
+        const targetPgs=applyTo==='all'?pages:[pages[curPage-1]];
+        let removed=0;
+
+        for(const page of targetPgs){
+            const contentStreamRefs=page.node.get(PDFName.of('Contents'));
+            if(!contentStreamRefs)continue;
+
+            const refs=[];
+            if(contentStreamRefs instanceof PDFArray){
+                for(let i=0;i<contentStreamRefs.size();i++) refs.push(contentStreamRefs.get(i));
+            } else {
+                refs.push(contentStreamRefs);
+            }
+
+            for(const ref of refs){
+                const stream=doc.context.lookup(ref);
+                if(!stream)continue;
+                let content='';
+                try{
+                    const encoded=stream.getContents();
+                    content=new TextDecoder('latin1').decode(encoded);
+                }catch{continue;}
+
+                // Find image drawing operations (Do operator with cm matrix)
+                const lines=content.split('\n');
+                const filtered=[];
+                for(let i=0;i<lines.length;i++){
+                    const line=lines[i].trim();
+
+                    if(line.endsWith('Do')){
+                        if(removeAll){
+                            // Remove the cm (transform matrix) before Do if exists
+                            if(filtered.length>0){
+                                const prev=filtered[filtered.length-1].trim();
+                                if(prev.endsWith('cm')){
+                                    // Check dimensions in cm matrix
+                                    const parts=prev.split(/\s+/);
+                                    if(parts.length>=7){
+                                        const w=Math.abs(parseFloat(parts[0]));
+                                        const h=Math.abs(parseFloat(parts[3]));
+                                        if(removeAll || (w>=minSize && w<=maxSize) || (h>=minSize && h<=maxSize)){
+                                            filtered.pop(); // remove cm
+                                            removed++;
+                                            continue; // skip Do
+                                        }
+                                    }
+                                }
+                            }
+                            removed++;
+                            continue;
+                        } else {
+                            // Check size from preceding cm
+                            if(filtered.length>0){
+                                const prev=filtered[filtered.length-1].trim();
+                                if(prev.endsWith('cm')){
+                                    const parts=prev.split(/\s+/);
+                                    if(parts.length>=7){
+                                        const w=Math.abs(parseFloat(parts[0]));
+                                        const h=Math.abs(parseFloat(parts[3]));
+                                        if((w>=minSize && w<=maxSize) || (h>=minSize && h<=maxSize)){
+                                            filtered.pop();
+                                            removed++;
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    filtered.push(lines[i]);
+                }
+
+                if(removed>0){
+                    try{
+                        stream.setContents(new TextEncoder().encode(filtered.join('\n')));
+                    }catch{}
+                }
+            }
+        }
+
+        await reload();
+        addHist('r',`Removed ${removed} image(s)`,removeAll?'All images':'Size filtered');
+        toast(removed>0?`Removed ${removed} image(s)!`:'No matching images found.', removed>0?'success':'warning');
+    }catch(e){console.error(e);toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== REMOVE ALL LINKS ====================
+async function removeAllLinks(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const applyTo=$id('rmLnkApply').value;
+    loading('Removing all links…');
+    try{
+        const pages=doc.getPages();
+        const targetPgs=applyTo==='all'?pages:[pages[curPage-1]];
+        let removed=0;
+
+        for(const page of targetPgs){
+            const annotsRef=page.node.get(PDFName.of('Annots'));
+            if(!annotsRef)continue;
+
+            const annots=doc.context.lookup(annotsRef);
+            if(!(annots instanceof PDFArray))continue;
+
+            const toKeep=[];
+            for(let i=0;i<annots.size();i++){
+                const annotRef=annots.get(i);
+                const annot=doc.context.lookup(annotRef);
+                if(!annot)continue;
+
+                const subtype=annot.get(PDFName.of('Subtype'));
+                if(subtype && subtype.toString()==='/Link'){
+                    removed++;
+                    // Don't keep this annotation
+                }else{
+                    toKeep.push(annotRef);
+                }
+            }
+
+            if(toKeep.length===0){
+                page.node.delete(PDFName.of('Annots'));
+            }else{
+                const newArr=doc.context.obj(toKeep);
+                page.node.set(PDFName.of('Annots'),newArr);
+            }
+        }
+
+        await reload();
+        addHist('r',`Removed ${removed} link(s)`,applyTo==='all'?'All pages':'Current page');
+        toast(removed>0?`Removed ${removed} link(s)!`:'No links found.', removed>0?'success':'warning');
+    }catch(e){console.error(e);toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== REMOVE SPECIFIC LINKS ====================
+async function removeSpecificLinks(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    const filter=$id('rmUrlFilter').value.trim().toLowerCase();
+    const applyTo=$id('rmUrlApply').value;
+    loading('Removing matching links…');
+    try{
+        const pages=doc.getPages();
+        const targetPgs=applyTo==='all'?pages:[pages[curPage-1]];
+        let removed=0;
+
+        for(const page of targetPgs){
+            const annotsRef=page.node.get(PDFName.of('Annots'));
+            if(!annotsRef)continue;
+
+            const annots=doc.context.lookup(annotsRef);
+            if(!(annots instanceof PDFArray))continue;
+
+            const toKeep=[];
+            for(let i=0;i<annots.size();i++){
+                const annotRef=annots.get(i);
+                const annot=doc.context.lookup(annotRef);
+                if(!annot){toKeep.push(annotRef);continue;}
+
+                const subtype=annot.get(PDFName.of('Subtype'));
+                if(subtype && subtype.toString()==='/Link'){
+                    // Check if it's a URL link
+                    const action=annot.get(PDFName.of('A'));
+                    if(action){
+                        const actionObj=doc.context.lookup(action);
+                        let isMatch=false;
+                        if(actionObj){
+                            const uri=actionObj.get?actionObj.get(PDFName.of('URI')):null;
+                            if(uri){
+                                const uriStr=uri.toString().toLowerCase();
+                                if(!filter || uriStr.includes(filter)){
+                                    isMatch=true;
+                                }
+                            }
+                            const s=actionObj.get?actionObj.get(PDFName.of('S')):null;
+                            if(s && s.toString()==='/URI' && !filter){
+                                isMatch=true;
+                            }
+                        }
+                        if(isMatch){removed++;continue;}
+                    }
+                    // Check for Dest (page links)
+                    const dest=annot.get(PDFName.of('Dest'));
+                    if(dest && !filter){
+                        removed++;continue;
+                    }
+                    // If filter provided but no match, keep it
+                    if(filter && !action){toKeep.push(annotRef);continue;}
+                    if(filter){toKeep.push(annotRef);continue;}
+                    removed++;continue;
+                }
+                toKeep.push(annotRef);
+            }
+
+            if(toKeep.length===0){
+                page.node.delete(PDFName.of('Annots'));
+            }else{
+                page.node.set(PDFName.of('Annots'),doc.context.obj(toKeep));
+            }
+        }
+
+        await reload();
+        addHist('r',`Removed ${removed} link(s)`,filter?`Filter: "${filter}"`:'All links');
+        toast(removed>0?`Removed ${removed} link(s)!`:'No matching links found.', removed>0?'success':'warning');
+    }catch(e){console.error(e);toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== TOOLS ====================
+async function updateMeta(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    try{
+        doc.setTitle($id('metaTitle').value);
+        doc.setAuthor($id('metaAuthor').value);
+        doc.setSubject($id('metaSubject').value);
+        await reload();
+        updatePdfInfo();
+        addHist('t','Metadata updated','');
+        toast('Metadata updated!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+}
+
+async function setPageBg(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    loading('Setting background…');
+    try{
+        const n=+$id('bgPgNum').value;
+        const c=hex2rgb($id('bgPgColor').value);
+        const pages=doc.getPages();
+        const targets=$id('bgPgApply').value==='all'?pages:(n>=1&&n<=pages.length?[pages[n-1]]:[]);
+        if(!targets.length)return toast('Invalid page!','warning');
+        targets.forEach(pg=>{
+            const{width,height}=pg.getSize();
+            // Draw rectangle BEHIND content by using a separate content stream
+            pg.drawRectangle({x:0,y:0,width,height,color:rgb(c.r,c.g,c.b)});
+        });
+        await reload();
+        addHist('p','Background set','');
+        toast('Background set!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+async function addPageNumbers(){
+    if(!doc)return toast('Open a PDF first!','warning');
+    loading('Adding page numbers…');
+    try{
+        const font=await doc.embedFont(StandardFonts.Helvetica);
+        const sz=+$id('pnSize').value||10;
+        const pos=$id('pnPos').value;
+        const fmt=$id('pnFmt').value;
+        const pages=doc.getPages();
+        pages.forEach((pg,i)=>{
+            const{width,height}=pg.getSize();
+            let text='';
+            if(fmt==='num')text=`${i+1}`;
+            else if(fmt==='of')text=`Page ${i+1} of ${pages.length}`;
+            else text=`- ${i+1} -`;
+            const tw=font.widthOfTextAtSize(text,sz);
+            let x,y;
+            if(pos==='bottom-center'){x=(width-tw)/2;y=30;}
+            else if(pos==='bottom-right'){x=width-tw-40;y=30;}
+            else if(pos==='bottom-left'){x=40;y=30;}
+            else if(pos==='top-center'){x=(width-tw)/2;y=height-30;}
+            else if(pos==='top-right'){x=width-tw-40;y=height-30;}
+            else{x=(width-tw)/2;y=30;}
+            pg.drawText(text,{x,y,size:sz,font,color:rgb(0.4,0.4,0.4)});
+        });
+        await reload();
+        addHist('t','Page numbers added',pos);
+        toast('Page numbers added!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== SAVE ====================
+async function savePDF(){
+    if(!doc)return toast('No PDF to save!','warning');
+    loading('Saving…');
+    try{
+        const bytes=await doc.save();
+        const blob=new Blob([bytes],{type:'application/pdf'});
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=url;a.download=fName.replace('.pdf','')+'_edited.pdf';
+        a.click();URL.revokeObjectURL(url);
+        toast('PDF saved!','success');
+    }catch(e){toast('Error: '+e.message,'error');}
+    loaded();
+}
+
+// ==================== KEYBOARD SHORTCUTS ====================
+document.addEventListener('keydown',e=>{
+    if(e.ctrlKey&&e.key==='s'){e.preventDefault();savePDF();}
+    if(e.ctrlKey&&e.key==='o'){e.preventDefault();$id('fileIn').click();}
+    if(e.ctrlKey&&e.key==='n'){e.preventDefault();createNewPDF();}
+});
+
+// Init watermark preview
+updateWmPrev();
+</script>
+</body>
+</html>
